@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# X Maker 1.2
+# Macrowave 2001
+
+#name of c file
+cfile=thebarber
+
+#name for binary (0 for x$cfile)
+appname=0
+
+#additional linker flags if necessary
+makerlinkerflags=
+
+#checks for the value yes
+makerautorun=no
+
+###########################
+####configuration above####
+###########################
+
+##########################
+#####internals below######
+##########################
+
+#if appname is "0" then set to x$progname
+if [ $appname = 0 ]; then
+	appname=x$cfile;
+fi;
+
+
+#variable for all the libraries required
+makerlibs='-lXaw -lXt -lXmu -lX11 -lm -lSM -lICE -lXext'
+
+#do not add -R command if Linux
+if [ `uname` = 'Linux' ]; then
+	envlinkerflags=
+else
+	envlinkerflags='-R/usr/X11R6/lib'
+fi;
+
+echo building $appname
+
+
+#compile the code
+cc -I/usr/X11R6/include -c $cfile.c
+
+makersavepipe=$PIPESTATUS
+
+if [ $makersavepipe = 0 ]; then
+	cc -L/usr/X11R6/lib $cfile.o $makerlibs $makerlinkerflags $envlinkerflags -Wl -o $appname
+	makersavepipe=$PIPESTATUS
+else
+	echo ERRORS COMPILING - NO USE TRYING TO LINK
+fi;
+
+
+if [ $makersavepipe = 0 ]; then
+	echo produced $appname
+
+	if [ $makerautorun == 'yes' ]; then
+		./$appname
+	fi;
+else
+	echo ERRORS PRODUCED - RETURN TO DRAWING BOARD
+fi;
